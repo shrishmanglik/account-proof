@@ -21,4 +21,12 @@ describe("public and persistence boundaries", () => {
       expect(migration).toMatch(new RegExp(`create policy[\\s\\S]+?on public\\.${table}\\b`, "i"));
     }
   });
+
+  it("binds every account and review relation to the same tenant", () => {
+    const migration = readFileSync("supabase/migrations/0001_accountproof.sql", "utf8");
+    expect(migration.match(/foreign key \(account_id, tenant_id\) references public\.accounts\(id, tenant_id\)/g)).toHaveLength(3);
+    expect(migration).toContain("foreign key (health_review_id, tenant_id) references public.health_reviews(id, tenant_id)");
+    expect(migration).not.toMatch(/account_id uuid[^,\n]*references public\.accounts\(id\)/);
+    expect(migration).not.toMatch(/health_review_id uuid[^,\n]*references public\.health_reviews\(id\)/);
+  });
 });

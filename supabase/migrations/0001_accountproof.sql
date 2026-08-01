@@ -28,56 +28,62 @@ create table public.accounts (
   region text not null,
   state text not null default 'ACTIVE',
   created_at timestamptz not null default now(),
+  unique (id, tenant_id),
   unique (tenant_id, external_ref)
 );
 
 create table public.evidence_items (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references public.tenants(id) on delete cascade,
-  account_id uuid not null references public.accounts(id) on delete cascade,
+  account_id uuid not null,
   source_system text not null,
   source_version text not null,
   source_digest text not null check (source_digest ~ '^[a-f0-9]{64}$'),
   observed_at timestamptz not null,
   payload jsonb not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  foreign key (account_id, tenant_id) references public.accounts(id, tenant_id) on delete cascade
 );
 
 create table public.health_reviews (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references public.tenants(id) on delete cascade,
-  account_id uuid not null references public.accounts(id) on delete cascade,
+  account_id uuid not null,
   input_digest text not null,
   receipt_digest text not null unique,
   rules_version text not null,
   state text not null,
   receipt jsonb not null,
   authored_by uuid not null references auth.users(id),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  unique (id, tenant_id),
+  foreign key (account_id, tenant_id) references public.accounts(id, tenant_id) on delete cascade
 );
 
 create table public.review_decisions (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references public.tenants(id) on delete cascade,
-  health_review_id uuid not null references public.health_reviews(id) on delete restrict,
+  health_review_id uuid not null,
   reviewer_id uuid not null references auth.users(id),
   decision text not null check (decision in ('ACCEPT', 'HOLD', 'ESCALATE')),
   decision_digest text not null unique,
   rationale text not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  foreign key (health_review_id, tenant_id) references public.health_reviews(id, tenant_id) on delete restrict
 );
 
 create table public.audit_events (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references public.tenants(id) on delete cascade,
-  account_id uuid references public.accounts(id) on delete cascade,
+  account_id uuid,
   actor_id uuid not null references auth.users(id),
   action text not null,
   record_type text not null,
   record_id uuid not null,
   before_digest text,
   after_digest text not null,
-  occurred_at timestamptz not null default now()
+  occurred_at timestamptz not null default now(),
+  foreign key (account_id, tenant_id) references public.accounts(id, tenant_id) on delete cascade
 );
 
 alter table public.tenants enable row level security;

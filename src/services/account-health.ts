@@ -6,15 +6,17 @@ import {
   type HealthFinding,
 } from "@/domain/contracts";
 import { sha256 } from "@/domain/digest";
+import { createReviewIdempotencyKey } from "@/domain/idempotency";
 
 const DAY_MS = 86_400_000;
 
 export function runAccountHealthReview(raw: AccountHealthReviewRequest): AccountHealthReviewReceipt {
   const input = AccountHealthReviewRequestSchema.parse(raw);
   const inputDigest = sha256(input);
-  const expectedKey = `${input.account.accountId}:review:`;
-  if (!input.idempotencyKey.startsWith(expectedKey)) {
-    throw new Error("Idempotency key does not match the bounded account operation.");
+  const { idempotencyKey, ...operation } = input;
+  const expectedKey = createReviewIdempotencyKey(operation);
+  if (idempotencyKey !== expectedKey) {
+    throw new Error("Idempotency key is not bound to the exact account review payload.");
   }
 
   const bySystem = new Map<EvidenceSystem, (typeof input.evidence)[number]>();
@@ -26,6 +28,10 @@ export function runAccountHealthReview(raw: AccountHealthReviewRequest): Account
 
   const missing = input.expectedSystems.filter((system) => !bySystem.has(system));
   const evaluationMs = Date.parse(input.evaluationTime);
+  const future = input.evidence.filter((item) => Date.parse(item.observedAt) > evaluationMs);
+  if (future.length > 0) {
+    throw new Error(`Future-dated evidence is prohibited: ${future.map((item) => item.evidenceId).join(", ")}.`);
+  }
   const stale = input.evidence.filter(
     (item) => evaluationMs - Date.parse(item.observedAt) > input.freshnessWindowDays * DAY_MS,
   );

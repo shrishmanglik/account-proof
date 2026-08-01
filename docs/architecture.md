@@ -36,7 +36,7 @@ The critical join is `CRM GREEN` against non-green support, deployment, or custo
 
 ## Persistence model
 
-Seven proposed tables separate tenants, membership, accounts, evidence, reviews, decisions, and append-oriented audit events. Every table has RLS enabled, and policies require authenticated tenant membership. This schema has not been applied or tested against a live Supabase project; provider truth is `UNKNOWN`.
+Seven proposed tables separate tenants, membership, accounts, evidence, reviews, decisions, and append-oriented audit events. Every table has RLS enabled, policies require authenticated tenant membership, and composite foreign keys bind account/review parents to the same tenant as each child. This schema has not been applied or tested against a live Supabase project; provider truth is `UNKNOWN`.
 
 ## Recovery model
 

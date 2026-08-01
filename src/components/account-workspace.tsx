@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { AccountHealthReviewReceipt, HumanDecisionReceipt, SignalStatus } from "@/domain/contracts";
-import { syntheticAccountReviewRequest } from "@/fixtures/synthetic-account";
+import { syntheticAccountReviewRequest, syntheticIncompleteAccountReviewRequest } from "@/fixtures/synthetic-account";
 
 type RequestState = "IDLE" | "LOADING" | "READY" | "ERROR";
 
@@ -46,12 +46,10 @@ export function AccountWorkspace() {
   const [error, setError] = useState<string | null>(null);
   const [incomplete, setIncomplete] = useState(false);
 
-  const request = useMemo(() => ({
-    ...syntheticAccountReviewRequest,
-    evidence: incomplete
-      ? syntheticAccountReviewRequest.evidence.filter((item) => item.system !== "CUSTOMER")
-      : syntheticAccountReviewRequest.evidence,
-  }), [incomplete]);
+  const request = useMemo(
+    () => incomplete ? syntheticIncompleteAccountReviewRequest : syntheticAccountReviewRequest,
+    [incomplete],
+  );
 
   async function runReview() {
     setRequestState("LOADING");

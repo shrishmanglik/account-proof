@@ -10,7 +10,7 @@ export const syntheticEvidence: EvidenceItem[] = [
   { evidenceId: "EV-SYN-REN-05", accountId: "acct-synthetic-0042", system: "RENEWAL", status: "AMBER", observedAt: "2026-07-30T16:00:00.000Z", ownerRole: "Renewal owner", summary: "Renewal review is approaching; accepted risk disposition is not yet recorded.", sourceVersion: "renewal-register/synthetic-v4", sha256: digest("e"), synthetic: true, authorized: true },
 ];
 
-export const syntheticAccountReviewRequest: AccountHealthReviewRequest = {
+const syntheticAccountReviewOperation: Omit<AccountHealthReviewRequest, "idempotencyKey"> = {
   schemaVersion: "AccountHealthReviewRequest.v1",
   account: {
     accountId: "acct-synthetic-0042",
@@ -26,5 +26,15 @@ export const syntheticAccountReviewRequest: AccountHealthReviewRequest = {
   evidence: syntheticEvidence,
   evaluationTime: "2026-08-01T14:00:00.000Z",
   freshnessWindowDays: 14,
-  idempotencyKey: "acct-synthetic-0042:review:2026-08-01:v1",
+};
+
+export const syntheticAccountReviewRequest: AccountHealthReviewRequest = {
+  ...syntheticAccountReviewOperation,
+  idempotencyKey: "acct-synthetic-0042:review:ff17bf124ea8c819091c6d10",
+};
+
+export const syntheticIncompleteAccountReviewRequest: AccountHealthReviewRequest = {
+  ...syntheticAccountReviewOperation,
+  evidence: syntheticAccountReviewOperation.evidence.filter((item) => item.system !== "CUSTOMER"),
+  idempotencyKey: "acct-synthetic-0042:review:25997fed267fd75601d544ab",
 };

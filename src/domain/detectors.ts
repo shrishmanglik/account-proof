@@ -44,8 +44,7 @@ const detectors: Record<RequirementId, Detector> = {
 export function evaluateControl(fixture: ControlFixture): DetectorResult {
   const detector = detectors[fixture.requirementId];
   const detectorId = `DET-${fixture.requirementId}` as const;
-  const disabled = process.env.ACCOUNTPROOF_DISABLED_DETECTOR === fixture.requirementId;
-  const valid = disabled ? true : detector.valid(fixture.signals);
+  const valid = detector.valid(fixture.signals);
   const base = {
     schemaVersion: "DetectorResult.v1" as const,
     detectorId,
@@ -53,7 +52,7 @@ export function evaluateControl(fixture: ControlFixture): DetectorResult {
     fixtureId: fixture.fixtureId,
     decision: valid ? ("PASS" as const) : ("REJECT" as const),
     issueCodes: valid ? [] : [detector.issueCode],
-    trace: disabled ? ["DETECTOR_DISABLED_MUTATION"] : [detector.trace, valid ? "CONTROL_PASSED" : "FAIL_CLOSED"],
+    trace: [detector.trace, valid ? "CONTROL_PASSED" : "FAIL_CLOSED"],
   };
   return { ...base, evidenceDigest: sha256(base) };
 }

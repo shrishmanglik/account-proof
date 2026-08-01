@@ -29,7 +29,7 @@ This manifest keeps repository behavior, GitHub state, and provider state separa
 - Typed boundaries: `AccountHealthReviewRequest.v1`, `AccountHealthReviewReceipt.v1`, and `HumanDecisionReceipt.v1`.
 - Deterministic service boundary: account binding, expected-set reconciliation, freshness, false-green detection, renewal risk, stable digests, and one safe next action.
 - Human boundary: exact receipt digest, independent reviewer identity, allowed role, acknowledged evidence, and external action fixed to false.
-- Proposed Supabase schema: seven tables (`tenants`, `tenant_memberships`, `accounts`, `evidence_items`, `health_reviews`, `review_decisions`, `audit_events`); RLS is enabled and policy presence is tested for all seven.
+- Proposed Supabase schema: seven tables (`tenants`, `tenant_memberships`, `accounts`, `evidence_items`, `health_reviews`, `review_decisions`, `audit_events`); RLS is enabled and policy presence is tested for all seven, while composite foreign keys prevent cross-tenant parent references.
 - Persistence/provider truth: source contract only; unapplied and `UNKNOWN` live behavior.
 
 ## Local verification evidence
@@ -45,18 +45,18 @@ The first passing-after attempt exposed two real defects instead of being report
 | Command | Exact result |
 | --- | --- |
 | `npm audit` | exit `0`; `0` vulnerabilities across 498 resolved dependencies |
-| `npm test` | exit `0`; 5 files, 35/35 tests passed |
+| `npm test` | exit `0`; 5 files, 38/38 tests passed |
 | `npm run test:controls` run 1 | exit `0`; 1 file, 24/24 tests passed |
 | `npm run test:controls` run 2 | exit `0`; 1 file, 24/24 tests passed |
-| `npm run test:mutation` | exit `0`; CP-R11 disabled -> inner control exit `1`; restored -> inner control exit `0` |
+| `npm run test:mutation` | exit `0`; runtime expected-source reconciliation line disabled -> service-test exit `1`; source restored byte-for-byte -> service-test exit `0` |
 | `npm run test:accessibility` | exit `0`; 2/2 tests passed |
-| `npm run test:security` | exit `0`; 2/2 tests passed |
+| `npm run test:security` | exit `0`; 3/3 tests passed |
 | `npm run test:recovery` | exit `0`; 4/4 tests passed |
 | `npm run typecheck` | exit `0` |
 | `npm run lint` | exit `0`, no warnings |
 | `npm run build` | exit `0`; optimized Next.js production build; `/` static plus `/api/reviews` and `/api/decisions` dynamic routes |
 
-Each of the twelve controls has a negative and positive fixture; each fixture is evaluated twice and must produce the same digest. The mutation harness disables the CP-R11 silent-success detector without altering the fixture, requires the suite to fail, restores the detector, and requires a clean pass.
+Each of the twelve controls has a negative and positive fixture; each fixture is evaluated twice and must produce the same digest. The mutation harness edits the actual `runAccountHealthReview` expected-source reconciliation line, requires the missing-source service test to fail, restores the source byte-for-byte in a `finally` block, and requires a clean service-test pass.
 
 ## Browser journey
 
