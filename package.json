@@ -1,0 +1,45 @@
+{
+  "name": "account-proof",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence-bound account reliability workspace for security-critical SaaS technical account teams.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:controls": "vitest run tests/detectors.test.ts",
+    "test:accessibility": "vitest run tests/accessibility-contract.test.ts",
+    "test:security": "vitest run tests/security.test.ts",
+    "test:recovery": "vitest run tests/recovery.test.ts",
+    "test:mutation": "node scripts/verify-mutation.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "overrides": {
+    "postcss": "8.5.25",
+    "sharp": "0.35.3"
+  }
+}
