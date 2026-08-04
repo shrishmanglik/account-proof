@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { AccountHealthReviewReceipt, HumanDecisionReceipt, SignalStatus } from "@/domain/contracts";
+import { formatObservedAt } from "@/domain/time";
 import { syntheticAccountReviewRequest, syntheticIncompleteAccountReviewRequest } from "@/fixtures/synthetic-account";
 
 type RequestState = "IDLE" | "LOADING" | "READY" | "ERROR";
@@ -195,7 +196,7 @@ export function AccountWorkspace() {
                   <p>{item.summary}</p>
                   <div className="evidence-meta">
                     <span><UserCheck size={13} /> {item.ownerRole}</span>
-                    <span><Clock3 size={13} /> {new Date(item.observedAt).toLocaleString("en-CA", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+                    <span><Clock3 size={13} /> {formatObservedAt(item.observedAt)}</span>
                     <span><Link2 size={13} /> {item.evidenceId}</span>
                   </div>
                 </article>
